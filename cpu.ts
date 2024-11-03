@@ -25,6 +25,16 @@ export enum Operation {
     END,
 }
 
+export enum AddressingMode {
+    START,
+    IMMEDIATE = START,
+    DIRECT,
+    INDIRECT,
+    STACK,
+    BASE,
+    END
+}
+
 export type Byte = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
 export type Word = number; // 2 bytes
 
