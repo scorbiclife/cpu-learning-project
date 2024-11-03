@@ -11,7 +11,7 @@ export enum Register {
     END,
 }
 
-export enum Operation {
+export enum Opcode {
     START,
     NOP = START,
     LOAD,
@@ -40,17 +40,17 @@ export type Word = number; // 2 bytes
 
 const OPCODE_SIZE = 1;
 
-const INSTRUCTION_OPERAND_SIZES: Record<Operation, number[]> = {
-    [Operation.NOP]: [],
-    [Operation.LOAD]: [1, 1, 2],
-    [Operation.STORE]: [1, 1, 2],
-    [Operation.MOV]: [1, 1],
-    [Operation.ADD]: [1, 1],
-    [Operation.SUB]: [1, 1],
-    [Operation.MUL]: [1, 1],
-    [Operation.JMP]: [2],
-    [Operation.JNZ]: [2],
-    [Operation.END]: [], // unused
+const INSTRUCTION_OPERAND_SIZES: Record<Opcode, number[]> = {
+    [Opcode.NOP]: [],
+    [Opcode.LOAD]: [1, 1, 2],
+    [Opcode.STORE]: [1, 1, 2],
+    [Opcode.MOV]: [1, 1],
+    [Opcode.ADD]: [1, 1],
+    [Opcode.SUB]: [1, 1],
+    [Opcode.MUL]: [1, 1],
+    [Opcode.JMP]: [2],
+    [Opcode.JNZ]: [2],
+    [Opcode.END]: [], // unused
 };
 
 type FlagsRegister = {
@@ -106,45 +106,45 @@ export class Cpu {
         this.instructionRegister = this.memoryBufferRegister;
     }
 
-    decode(operation: Operation) {
+    decode(operation: Opcode) {
         switch (operation) {
-            case Operation.NOP: {
+            case Opcode.NOP: {
                 this.nextProgramCounter = this.programCounter + 1;
                 break;
             }
-            case Operation.LOAD: {
+            case Opcode.LOAD: {
                 this.nextProgramCounter = this.programCounter + 5;
                 break;
             }
-            case Operation.STORE: {
+            case Opcode.STORE: {
                 this.nextProgramCounter = this.programCounter + 5;
                 break;
             }
-            case Operation.MOV: {
+            case Opcode.MOV: {
                 this.nextProgramCounter = this.programCounter + 3;
                 break;
             }
-            case Operation.ADD: {
+            case Opcode.ADD: {
                 this.nextProgramCounter = this.programCounter + 3;
                 break;
             }
-            case Operation.SUB: {
+            case Opcode.SUB: {
                 this.nextProgramCounter = this.programCounter + 3;
                 break;
             }
-            case Operation.MUL: {
+            case Opcode.MUL: {
                 this.nextProgramCounter = this.programCounter + 3;
                 break;
             }
-            case Operation.JMP: {
+            case Opcode.JMP: {
                 this.nextProgramCounter = this.programCounter + 3;
                 break;
             }
-            case Operation.JNZ: {
+            case Opcode.JNZ: {
                 this.nextProgramCounter = this.programCounter + 3;
                 break;
             }
-            case Operation.END: {
+            case Opcode.END: {
                 this.nextProgramCounter = this.programCounter + 1;
                 break;
             }

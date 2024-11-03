@@ -1,8 +1,8 @@
 import { test, expect } from "@jest/globals";
-import { AddressingMode, Byte, Cpu, Operation, Register, Word } from "./cpu";
+import { AddressingMode, Byte, Cpu, Opcode, Register, Word } from "./cpu";
 
 const { R1, R2 } = Register;
-const { LOAD, STORE, NOP, ADD } = Operation;
+const { LOAD, STORE, NOP, ADD } = Opcode;
 const { IMMEDIATE } = AddressingMode;
 
 test("can fetch instructions with variable length", () => {
