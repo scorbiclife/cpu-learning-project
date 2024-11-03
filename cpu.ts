@@ -78,6 +78,8 @@ export class Cpu {
     generalRegisters: Record<Register, Word>;
     stackPointer: Word;
     basePointer: Word;
+    // possibly different from real cpus
+    nextProgramCounter: Word;
 
     constructor(public program: Byte[], public stack: Byte[]) {
         this.programCounter = 0;
@@ -89,6 +91,8 @@ export class Cpu {
         this.fetch();
         this.decode();
         this.execute();
+        this.writeBack();
+        this.nextPc();
     }
 
     fetch() {
@@ -98,10 +102,17 @@ export class Cpu {
 
     decode() {
         this.instructionRegister = this.memoryBufferRegister;
-        this.programCounter += INSTRUCTION_LENGTH[this.instructionRegister];
+        this.nextProgramCounter =
+            this.programCounter + INSTRUCTION_LENGTH[this.instructionRegister];
     }
 
     execute() {
         // TODO
+    }
+
+    writeBack() {}
+
+    nextPc() {
+        this.programCounter = this.nextProgramCounter;
     }
 }
