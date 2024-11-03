@@ -53,6 +53,10 @@ const INSTRUCTION_OPERAND_SIZES: Record<Opcode, number[]> = {
     [Opcode.END]: [], // unused
 };
 
+function getInstructionLength(opcode: Opcode) {
+    return OPCODE_SIZE + INSTRUCTION_OPERAND_SIZES[opcode].reduce((a, b) => a + b, 0);
+}
+
 type FlagsRegister = {
     sign: boolean;
     zero: boolean;
@@ -107,45 +111,36 @@ export class Cpu {
     }
 
     decode(operation: Opcode) {
+        this.nextProgramCounter = this.programCounter + getInstructionLength(operation);
         switch (operation) {
             case Opcode.NOP: {
-                this.nextProgramCounter = this.programCounter + 1;
                 break;
             }
             case Opcode.LOAD: {
-                this.nextProgramCounter = this.programCounter + 5;
                 break;
             }
             case Opcode.STORE: {
-                this.nextProgramCounter = this.programCounter + 5;
                 break;
             }
             case Opcode.MOV: {
-                this.nextProgramCounter = this.programCounter + 3;
                 break;
             }
             case Opcode.ADD: {
-                this.nextProgramCounter = this.programCounter + 3;
                 break;
             }
             case Opcode.SUB: {
-                this.nextProgramCounter = this.programCounter + 3;
                 break;
             }
             case Opcode.MUL: {
-                this.nextProgramCounter = this.programCounter + 3;
                 break;
             }
             case Opcode.JMP: {
-                this.nextProgramCounter = this.programCounter + 3;
                 break;
             }
             case Opcode.JNZ: {
-                this.nextProgramCounter = this.programCounter + 3;
                 break;
             }
             case Opcode.END: {
-                this.nextProgramCounter = this.programCounter + 1;
                 break;
             }
         }
