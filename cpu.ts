@@ -16,8 +16,10 @@ export enum Register {
 export enum Opcode {
     START,
     NOP = START,
-    LOAD,
-    STORE,
+    LOAD_IMMEDIATE,
+    STORE_IMMEDIATE,
+    LOAD_DIRECT,
+    STORE_DIRECT,
     MOV,
     ADD,
     SUB,
@@ -27,22 +29,14 @@ export enum Opcode {
     END,
 }
 
-export enum AddressingMode {
-    START,
-    IMMEDIATE = START,
-    DIRECT,
-    INDIRECT,
-    STACK,
-    BASE,
-    END,
-}
-
 const OPCODE_SIZE = 1;
 
 const INSTRUCTION_OPERAND_SIZES: Record<Opcode, number[]> = {
     [Opcode.NOP]: [],
-    [Opcode.LOAD]: [1, 1, 2],
-    [Opcode.STORE]: [1, 1, 2],
+    [Opcode.LOAD_IMMEDIATE]: [1, 2],
+    [Opcode.STORE_IMMEDIATE]: [1, 2],
+    [Opcode.LOAD_DIRECT]: [1, 2],
+    [Opcode.STORE_DIRECT]: [1, 2],
     [Opcode.MOV]: [1, 1],
     [Opcode.ADD]: [1, 1],
     [Opcode.SUB]: [1, 1],
@@ -92,6 +86,8 @@ export class Cpu {
         this.fetch();
         this.decode(this.instructionRegister);
         this.execute();
+        this.readOrWriteMemory();
+        this.writeBack();
         this.updateProgramCounter();
     }
 
@@ -111,19 +107,26 @@ export class Cpu {
     fetch() {
         this.fetchByte(this.programCounter);
         this.instructionRegister = this.memoryBufferRegister;
+        this.nextProgramCounter =
+            this.programCounter +
+            getInstructionLength(this.instructionRegister);
     }
 
     decode(operation: Opcode) {
-        this.nextProgramCounter =
-            this.programCounter + getInstructionLength(operation);
         switch (operation) {
             case Opcode.NOP: {
                 break;
             }
-            case Opcode.LOAD: {
+            case Opcode.LOAD_IMMEDIATE: {
                 break;
             }
-            case Opcode.STORE: {
+            case Opcode.STORE_IMMEDIATE: {
+                break;
+            }
+            case Opcode.LOAD_DIRECT: {
+                break;
+            }
+            case Opcode.STORE_DIRECT: {
                 break;
             }
             case Opcode.MOV: {
@@ -153,6 +156,10 @@ export class Cpu {
     execute() {
         // TODO
     }
+
+    readOrWriteMemory() {}
+
+    writeBack() {}
 
     updateProgramCounter() {
         this.programCounter = this.nextProgramCounter;
