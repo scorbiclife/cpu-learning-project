@@ -14,8 +14,9 @@ test("can fetch instructions with variable length", () => {
         ADD, R1, R2,
         STORE, R1, IMMEDIATE, 0x00, 0x01,
     ];
-    const stack: Byte[] = [];
-    const cpu = new Cpu(program, stack);
+    const stack = Array(1024).fill(0x00);
+    const memory = ([] as Byte[]).concat(program, stack);
+    const cpu = new Cpu(memory);
     const instructions: Word[] = [];
     while (cpu.programCounter < program.length) {
         cpu.handleClock();

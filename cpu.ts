@@ -53,12 +53,6 @@ const INSTRUCTION_OPERAND_SIZES: Record<Operation, number[]> = {
     [Operation.END]: [], // unused
 };
 
-const INSTRUCTION_LENGTH = {} as Record<Operation, number>;
-for (let ins = Operation.START; ins != Operation.END; ++ins) {
-    INSTRUCTION_LENGTH[ins] =
-        INSTRUCTION_OPERAND_SIZES[ins].reduce((a, b) => a + b, 0) + OPCODE_SIZE;
-}
-
 type FlagsRegister = {
     sign: boolean;
     zero: boolean;
@@ -78,41 +72,90 @@ export class Cpu {
     generalRegisters: Record<Register, Word>;
     stackPointer: Word;
     basePointer: Word;
+
     // possibly different from real cpus
     nextProgramCounter: Word;
 
-    constructor(public program: Byte[], public stack: Byte[]) {
+    constructor(public memory: Byte[]) {
         this.programCounter = 0;
-        this.stackPointer = 0;
-        this.basePointer = 0;
+        this.stackPointer = memory.length - 1;
+        this.basePointer = memory.length - 1;
     }
 
     handleClock() {
         this.fetch();
-        this.decode();
+        this.decode(this.instructionRegister);
         this.execute();
-        this.writeBack();
-        this.nextPc();
+        this.updateProgramCounter();
+    }
+
+    fetchByte(address: number) {
+        this.memoryAddressRegister = address;
+        this.memoryBufferRegister = this.memory[this.memoryAddressRegister];
+    }
+
+    fetchWord(address: number) {
+        this.memoryAddressRegister = address;
+        this.memoryBufferRegister =
+            this.memory[this.memoryAddressRegister] +
+            this.memory[this.memoryAddressRegister + 1] * 256;
     }
 
     fetch() {
-        this.memoryAddressRegister = this.programCounter;
-        this.memoryBufferRegister = this.program[this.memoryAddressRegister];
+        this.fetchByte(this.programCounter);
+        this.instructionRegister = this.memoryBufferRegister;
     }
 
-    decode() {
-        this.instructionRegister = this.memoryBufferRegister;
-        this.nextProgramCounter =
-            this.programCounter + INSTRUCTION_LENGTH[this.instructionRegister];
+    decode(operation: Operation) {
+        switch (operation) {
+            case Operation.NOP: {
+                this.nextProgramCounter = this.programCounter + 1;
+                break;
+            }
+            case Operation.LOAD: {
+                this.nextProgramCounter = this.programCounter + 5;
+                break;
+            }
+            case Operation.STORE: {
+                this.nextProgramCounter = this.programCounter + 5;
+                break;
+            }
+            case Operation.MOV: {
+                this.nextProgramCounter = this.programCounter + 3;
+                break;
+            }
+            case Operation.ADD: {
+                this.nextProgramCounter = this.programCounter + 3;
+                break;
+            }
+            case Operation.SUB: {
+                this.nextProgramCounter = this.programCounter + 3;
+                break;
+            }
+            case Operation.MUL: {
+                this.nextProgramCounter = this.programCounter + 3;
+                break;
+            }
+            case Operation.JMP: {
+                this.nextProgramCounter = this.programCounter + 3;
+                break;
+            }
+            case Operation.JNZ: {
+                this.nextProgramCounter = this.programCounter + 3;
+                break;
+            }
+            case Operation.END: {
+                this.nextProgramCounter = this.programCounter + 1;
+                break;
+            }
+        }
     }
 
     execute() {
         // TODO
     }
 
-    writeBack() {}
-
-    nextPc() {
+    updateProgramCounter() {
         this.programCounter = this.nextProgramCounter;
     }
 }
