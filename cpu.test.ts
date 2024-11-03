@@ -1,5 +1,6 @@
 import { test, expect } from "@jest/globals";
-import { AddressingMode, Byte, Cpu, Opcode, Register, Word } from "./cpu";
+import { AddressingMode, Cpu, Opcode, Register } from "./cpu";
+import { Byte, Word } from "./lib";
 
 const { R1, R2 } = Register;
 const { LOAD, STORE, NOP, ADD } = Opcode;

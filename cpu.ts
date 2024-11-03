@@ -1,3 +1,5 @@
+import { Word, Byte, getWordFromBytes } from "./lib";
+
 export enum Register {
     START,
     R0 = START,
@@ -34,9 +36,6 @@ export enum AddressingMode {
     BASE,
     END,
 }
-
-export type Byte = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
-export type Word = number; // 2 bytes
 
 const OPCODE_SIZE = 1;
 
@@ -103,9 +102,10 @@ export class Cpu {
 
     fetchWord(address: number) {
         this.memoryAddressRegister = address;
-        this.memoryBufferRegister =
-            this.memory[this.memoryAddressRegister] +
-            this.memory[this.memoryAddressRegister + 1] * 256;
+        this.memoryBufferRegister = getWordFromBytes(
+            this.memory[this.memoryAddressRegister],
+            this.memory[this.memoryAddressRegister + 1]
+        );
     }
 
     fetch() {
