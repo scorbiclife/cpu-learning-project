@@ -20,7 +20,7 @@ test("can fetch instructions with variable length", () => {
     const cpu = new Cpu(memory);
     const instructions: Word[] = [];
     while (cpu.programCounter < program.length) {
-        cpu.handleClock();
+        cpu.handleInstruction();
         instructions.push(cpu.instructionRegister);
     }
     expect(instructions).toEqual([LOAD, LOAD, NOP, ADD, STORE]);

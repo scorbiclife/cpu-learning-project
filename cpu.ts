@@ -88,7 +88,7 @@ export class Cpu {
         this.basePointer = memory.length - 1;
     }
 
-    handleClock() {
+    handleInstruction() {
         this.fetch();
         this.decode(this.instructionRegister);
         this.execute();
