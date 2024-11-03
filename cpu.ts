@@ -29,30 +29,6 @@ export enum Opcode {
     END,
 }
 
-const OPCODE_SIZE = 1;
-
-const INSTRUCTION_OPERAND_SIZES: Record<Opcode, number[]> = {
-    [Opcode.NOP]: [],
-    [Opcode.LOAD_IMMEDIATE]: [1, 2],
-    [Opcode.STORE_IMMEDIATE]: [1, 2],
-    [Opcode.LOAD_DIRECT]: [1, 2],
-    [Opcode.STORE_DIRECT]: [1, 2],
-    [Opcode.MOV]: [1, 1],
-    [Opcode.ADD]: [1, 1],
-    [Opcode.SUB]: [1, 1],
-    [Opcode.MUL]: [1, 1],
-    [Opcode.JMP]: [2],
-    [Opcode.JNZ]: [2],
-    [Opcode.END]: [], // unused
-};
-
-function getInstructionLength(opcode: Opcode) {
-    return (
-        OPCODE_SIZE +
-        INSTRUCTION_OPERAND_SIZES[opcode].reduce((a, b) => a + b, 0)
-    );
-}
-
 type FlagsRegister = {
     sign: boolean;
     zero: boolean;
@@ -67,6 +43,7 @@ export class Cpu {
     programCounter: Word;
     memoryAddressRegister: Word;
     memoryBufferRegister: Word;
+    memoryBufferRegister2: Word;
     instructionRegister: Word;
     flagsResister: FlagsRegister;
     generalRegisters: Record<Register, Word>;
@@ -84,10 +61,7 @@ export class Cpu {
 
     handleInstruction() {
         this.fetch();
-        this.decode(this.instructionRegister);
-        this.execute();
-        this.readOrWriteMemory();
-        this.writeBack();
+        this.decodeExecuteWriteback();
         this.updateProgramCounter();
     }
 
@@ -104,21 +78,27 @@ export class Cpu {
         );
     }
 
+    fetchDoubleWord(address: number) {
+        this.fetchWord(address);
+        this.memoryBufferRegister2 = getWordFromBytes(
+            this.memory[this.memoryAddressRegister + 2],
+            this.memory[this.memoryAddressRegister + 3]
+        )
+    }
+
     fetch() {
         this.fetchByte(this.programCounter);
         this.instructionRegister = this.memoryBufferRegister;
-        this.nextProgramCounter =
-            this.programCounter +
-            getInstructionLength(this.instructionRegister);
+        this.nextProgramCounter = this.programCounter + 4;
     }
 
-    decode(operation: Opcode) {
-        switch (operation) {
+    decodeExecuteWriteback() {
+        switch (this.instructionRegister) {
             case Opcode.NOP: {
-                break;
+                return;
             }
             case Opcode.LOAD_IMMEDIATE: {
-                break;
+                // decode
             }
             case Opcode.STORE_IMMEDIATE: {
                 break;
@@ -152,14 +132,6 @@ export class Cpu {
             }
         }
     }
-
-    execute() {
-        // TODO
-    }
-
-    readOrWriteMemory() {}
-
-    writeBack() {}
 
     updateProgramCounter() {
         this.programCounter = this.nextProgramCounter;

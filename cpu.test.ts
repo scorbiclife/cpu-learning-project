@@ -5,13 +5,13 @@ import { Byte, Word } from "./lib";
 const { R1, R2 } = Register;
 const { LOAD_DIRECT, LOAD_IMMEDIATE, STORE_DIRECT, NOP, ADD } = Opcode;
 
-test("can fetch instructions with variable length", () => {
+test("can fetch instructions of opcode + register + 2 byte data", () => {
     // prettier-ignore
     const program: Byte[] = [
         LOAD_DIRECT, R1, 0x00, 0x01,
         LOAD_IMMEDIATE, R2, 0x00, 0x02,
-        NOP,
-        ADD, R1, R2,
+        NOP, 0x00, 0x00, 0x00,
+        ADD, R1, R2, 0x00,
         STORE_DIRECT, R1, 0x00, 0x01,
     ];
     const stack = Array(1024).fill(0x00);
