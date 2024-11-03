@@ -22,5 +22,5 @@ test("can fetch instructions with variable length", () => {
         cpu.handleClock();
         instructions.push(cpu.instructionRegister);
     }
-    expect(instructions).toEqual([LOAD, LOAD, NOP, ADD, STORE])
-})
+    expect(instructions).toEqual([LOAD, LOAD, NOP, ADD, STORE]);
+});

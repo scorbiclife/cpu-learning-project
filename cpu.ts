@@ -32,7 +32,7 @@ export enum AddressingMode {
     INDIRECT,
     STACK,
     BASE,
-    END
+    END,
 }
 
 export type Byte = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
@@ -54,7 +54,10 @@ const INSTRUCTION_OPERAND_SIZES: Record<Opcode, number[]> = {
 };
 
 function getInstructionLength(opcode: Opcode) {
-    return OPCODE_SIZE + INSTRUCTION_OPERAND_SIZES[opcode].reduce((a, b) => a + b, 0);
+    return (
+        OPCODE_SIZE +
+        INSTRUCTION_OPERAND_SIZES[opcode].reduce((a, b) => a + b, 0)
+    );
 }
 
 type FlagsRegister = {
@@ -111,7 +114,8 @@ export class Cpu {
     }
 
     decode(operation: Opcode) {
-        this.nextProgramCounter = this.programCounter + getInstructionLength(operation);
+        this.nextProgramCounter =
+            this.programCounter + getInstructionLength(operation);
         switch (operation) {
             case Opcode.NOP: {
                 break;
