@@ -133,6 +133,7 @@ export class Cpu {
             case Opcode.LOAD_IMMEDIATE: {
                 // write-back
                 this.generalRegisters[this.registerOperand] = this.dataOperand;
+                return;
             }
             case Opcode.LOAD_DIRECT: {
                 // memory
