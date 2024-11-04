@@ -141,7 +141,7 @@ export class Cpu {
                 // write-back
                 this.generalRegisters[this.registerOperand] =
                     this.memoryBufferRegister;
-                break;
+                return;
             }
             case Opcode.STORE_DIRECT: {
                 // memory
@@ -149,28 +149,28 @@ export class Cpu {
                     this.dataOperand,
                     this.generalRegisters[this.registerOperand]
                 );
-                break;
+                return;
             }
             case Opcode.MOV: {
-                break;
+                return;
             }
             case Opcode.ADD: {
-                break;
+                return;
             }
             case Opcode.SUB: {
-                break;
+                return;
             }
             case Opcode.MUL: {
-                break;
+                return;
             }
             case Opcode.JMP: {
-                break;
+                return;
             }
             case Opcode.JNZ: {
-                break;
+                return;
             }
             case Opcode.END: {
-                break;
+                return;
             }
         }
     }
