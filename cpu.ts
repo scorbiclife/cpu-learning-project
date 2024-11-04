@@ -46,7 +46,7 @@ export class Cpu {
     flagsRegister: FlagsRegister;
     generalRegisters: Record<Register, Word>;
     stackPointer: Word;
-    basePointer: Word;
+    baseRegister: Word;
 
     // possibly different from real cpus
     registerOperand: Register;
@@ -75,7 +75,7 @@ export class Cpu {
             [Register.END]: 0x0000, // unused
         };
         this.stackPointer = memory.length - 1;
-        this.basePointer = memory.length - 1;
+        this.baseRegister = 0;
     }
 
     handleInstruction() {
