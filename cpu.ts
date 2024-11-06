@@ -34,6 +34,8 @@ export enum Opcode {
     LOAD_IMMEDIATE_2,
     LOAD_DIRECT,
     STORE_DIRECT,
+    LOAD_INDIRECT,
+    STORE_INDIRECT,
     MOV,
     ADD,
     SUB,
@@ -175,7 +177,7 @@ export class CpuControlUnit {
 export class CpuArithmeticLogicUnit {
     private cpu: Cpu;
 
-    inputOpcode: Byte;
+    inputOpcode: Opcode;
     inputRegisterName: Byte;
     inputData: Word;
 
@@ -210,12 +212,24 @@ export class CpuArithmeticLogicUnit {
                 // memory
                 this.cpu.cu.loadWord(this.inputData);
                 // write-back
-                this.targetRegister = this.cpu.cu.memoryBufferRegister;
+                this.targetRegister = this.cpu.memoryBufferRegister;
                 return;
             }
             case Opcode.STORE_DIRECT: {
                 // memory
                 this.cpu.cu.storeWord(this.inputData, this.targetRegister);
+                return;
+            }
+            case Opcode.LOAD_INDIRECT: {
+                this.cpu.cu.loadWord(this.inputData);
+                this.cpu.cu.loadWord(this.cpu.memoryBufferRegister);
+                this.targetRegister = this.cpu.memoryBufferRegister;
+                return;
+            }
+            case Opcode.STORE_INDIRECT: {
+                this.cpu.cu.loadWord(this.inputData);
+                this.cpu.cu.loadWord(this.cpu.memoryBufferRegister);
+                this.cpu.cu.storeWord(this.cpu.memoryBufferRegister, this.targetRegister);
                 return;
             }
             case Opcode.MOV: {
