@@ -1,12 +1,18 @@
 {
   "name": "cpu",
   "version": "0.0.1",
-  "main": "index.js",
+  "main": "index.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "npx ts-node index.ts",
+    "test": "jest"
   },
   "keywords": [],
   "author": "scorbiclife <scorbiclife@gmail.com>",
   "license": "MIT",
-  "description": ""
+  "description": "",
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.5",
+    "ts-node": "^10.9.2"
+  }
 }
