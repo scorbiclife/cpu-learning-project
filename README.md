@@ -15,6 +15,7 @@
     - 32비트 워드, 16비트 주소공간
         - 기존에 16비트 워드, 16비트 주소공간, 32비트 길이 명령어를 만들었습니다.
           그런데 fetch 한 번을 위해 메모리에 여러 번 접근하는 것이 아쉬웠습니다.
-        - 16비트 워드의 경우 Immediate addressing mode에서 사용할 수 있는 값이 16비트로 한정되어 있습니다.
+        - 워드 크기를 32비트로 만들 경우 Immediate addressing mode에서 사용할 수 있는 값이 16비트로
+          한정되어 있다는 것이 새로운 고려 대상입니다.
           그래서 기존의 LOAD_IMMEDIATE 명령어를 LOAD_IMMEDIATE_1, LOAD_IMMEDIATE_2로 바꾸어 각각
           {least, most} significant 16비트를 세팅할 수 있도록 하였습니다.
