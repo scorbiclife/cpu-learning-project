@@ -37,3 +37,7 @@ export function storeWordAtAddress(memory: Byte[], address: Word, value: Word) {
     memory[address + 2] = byte2;
     memory[address + 3] = byte3;
 }
+
+export function storeBytes(memory: Byte[], bytes: Byte[], offset: Word = 0) {
+    bytes.forEach((byte, i) => (memory[offset + i] = byte));
+}

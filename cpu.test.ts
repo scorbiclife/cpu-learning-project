@@ -1,6 +1,6 @@
 import { test, expect, describe } from "@jest/globals";
 import { Cpu, Opcode, Register } from "./cpu";
-import { Byte, loadWordAtAddress, Word, storeWordAtAddress } from "./lib";
+import { Byte, loadWordAtAddress, storeBytes, storeWordAtAddress } from "./lib";
 
 const { R0, R1, R2 } = Register;
 const {
@@ -20,10 +20,6 @@ function createLargeZeroMemory(): Byte[] {
             return Reflect.get(target, property, receiver) ?? 0x00;
         },
     });
-}
-
-function loadProgram(memory: Byte[], program: Byte[], startAddress: Word = 0) {
-    program.forEach((byte, i) => (memory[startAddress + i] = byte));
 }
 
 function runProgram(cpu: Cpu, program: Byte[]) {
@@ -46,7 +42,7 @@ test("direct memory addressing", () => {
         STORE_DIRECT, R2, 0x00, 0x01, // Address 256
         STORE_DIRECT, R1, 0x04, 0x01, // Address 260
     ];
-    loadProgram(memory, program);
+    storeBytes(memory, program);
 
     const cpu = new Cpu(memory);
     runProgram(cpu, program);
@@ -73,7 +69,7 @@ describe("indirect memory addressing", () => {
             LOAD_INDIRECT, R0, 0x00, 0x01,
             STORE_DIRECT, R0, 0x00, 0x02, // address 0x200
         ];
-        loadProgram(memory, program);
+        storeBytes(memory, program);
 
         const cpu = new Cpu(memory);
         runProgram(cpu, program);
@@ -92,7 +88,7 @@ describe("indirect memory addressing", () => {
             LOAD_DIRECT, R0, 0x00, 0x02,
             STORE_INDIRECT, R0, 0x00, 0x01, // 0x0100
         ];
-        loadProgram(memory, program);
+        storeBytes(memory, program);
 
         const cpu = new Cpu(memory);
         runProgram(cpu, program);
