@@ -30,7 +30,8 @@ function defaultRegisters(): Record<Register, Word> {
 export enum Opcode {
     START,
     NOP = START,
-    LOAD_IMMEDIATE,
+    LOAD_IMMEDIATE_1,
+    LOAD_IMMEDIATE_2,
     LOAD_DIRECT,
     STORE_DIRECT,
     MOV,
@@ -97,13 +98,11 @@ export class Cpu {
         this.baseRegister = 0;
     }
 
-
     handleInstruction() {
         this.cu.fetchAndDecode();
         this.alu.execute();
     }
 }
-
 
 const OPCODE_OFFSET = 0;
 const REGISTER_OPERAND_OFFSET = 1;
@@ -141,29 +140,31 @@ export class CpuControlUnit {
         this.memoryAddressRegister = address;
         this.memoryBufferRegister = getWordFromBytes(
             this.cpu.memory[this.memoryAddressRegister],
-            this.cpu.memory[this.memoryAddressRegister + 1]
+            this.cpu.memory[this.memoryAddressRegister + 1],
+            this.cpu.memory[this.memoryAddressRegister + 2],
+            this.cpu.memory[this.memoryAddressRegister + 3]
         );
     }
 
     storeWord(address: Word, value: Word) {
         this.memoryAddressRegister = address;
         this.memoryBufferRegister = value;
-        const [byte0, byte1] = getBytesFromWord(this.memoryBufferRegister);
+        const [byte0, byte1, byte2, byte3] = getBytesFromWord(
+            this.memoryBufferRegister
+        );
         this.cpu.memory[this.memoryAddressRegister] = byte0;
         this.cpu.memory[this.memoryAddressRegister + 1] = byte1;
+        this.cpu.memory[this.memoryAddressRegister + 2] = byte2;
+        this.cpu.memory[this.memoryAddressRegister + 3] = byte3;
     }
 
     fetchAndDecode() {
-        this.loadByte(this.programCounter + OPCODE_OFFSET);
+        this.loadWord(this.programCounter + OPCODE_OFFSET);
         this.instructionRegister = this.memoryBufferRegister;
-        this.loadByte(this.programCounter + REGISTER_OPERAND_OFFSET);
-        const registerOperandSignal = this.memoryBufferRegister;
-        this.loadWord(this.programCounter + DATA_OPERAND_OFFSET);
-        const dataOperandSignal = this.memoryBufferRegister;
 
-        this.cpu.alu.inputOpcode = this.instructionRegister;
-        this.cpu.alu.inputRegisterName = registerOperandSignal;
-        this.cpu.alu.inputData= dataOperandSignal;
+        this.cpu.alu.inputOpcode = this.instructionRegister & 0xff;
+        this.cpu.alu.inputRegisterName = (this.instructionRegister >> 8) & 0xff;
+        this.cpu.alu.inputData = this.instructionRegister >> 16;
         this.programCounter += INSTRUCTION_LENGTH;
     }
 }
@@ -192,9 +193,14 @@ export class CpuArithmeticLogicUnit {
             case Opcode.NOP: {
                 return;
             }
-            case Opcode.LOAD_IMMEDIATE: {
+            case Opcode.LOAD_IMMEDIATE_1: {
                 // write-back
-                this.targetRegister = this.inputData;
+                this.targetRegister = (this.targetRegister & 0xffff0000) | this.inputData;
+                return;
+            }
+            case Opcode.LOAD_IMMEDIATE_2: {
+                // write-back
+                this.targetRegister = (this.targetRegister & 0x0000ffff) | (this.inputData << 16);
                 return;
             }
             case Opcode.LOAD_DIRECT: {
