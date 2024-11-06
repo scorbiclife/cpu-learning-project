@@ -4,11 +4,12 @@ import { Byte, getWordFromBytes, Word } from "./lib";
 
 const { R0, R1, R2 } = Register;
 const {
-    LOAD_DIRECT,
-    LOAD_INDIRECT,
     LOAD_IMMEDIATE_1,
     LOAD_IMMEDIATE_2,
+    LOAD_DIRECT,
     STORE_DIRECT,
+    LOAD_INDIRECT,
+    STORE_INDIRECT,
     NOP,
     ADD,
 } = Opcode;
@@ -73,6 +74,7 @@ describe("indirect memory addressing", () => {
             memory[0x67452302],
             memory[0x67452303],
         ] = [0x01, 0x02, 0x03, 0x04];
+        // prettier-ignore
         const program = [
             LOAD_INDIRECT, R0, 0x00, 0x01,
             STORE_DIRECT, R0, 0x00, 0x02, // address 0x200
@@ -81,7 +83,44 @@ describe("indirect memory addressing", () => {
 
         const cpu = new Cpu(memory);
         runProgram(cpu, program);
-        const result = getWordFromBytes(memory[0x200], memory[0x201], memory[0x202], memory[0x203]);
+
+        const result = getWordFromBytes(
+            memory[0x200],
+            memory[0x201],
+            memory[0x202],
+            memory[0x203]
+        );
+        expect(result).toEqual(0x04030201);
+    });
+
+    test("store indirect", () => {
+        const memory = createLargeZeroMemory();
+        memory[0x0100] = 0x10;
+        memory[0x0101] = 0x32;
+        memory[0x0102] = 0x54;
+        memory[0x0103] = 0x76;
+
+        memory[0x0200] = 0x01;
+        memory[0x0201] = 0x02;
+        memory[0x0202] = 0x03;
+        memory[0x0203] = 0x04;
+
+        // prettier-ignore
+        const program = [
+            LOAD_DIRECT, R0, 0x00, 0x02,
+            STORE_INDIRECT, R0, 0x00, 0x01, // 0x0100
+        ];
+        loadProgram(memory, program);
+
+        const cpu = new Cpu(memory);
+        runProgram(cpu, program);
+
+        const result = getWordFromBytes(
+            memory[0x76543210],
+            memory[0x76543211],
+            memory[0x76543212],
+            memory[0x76543213]
+        );
         expect(result).toEqual(0x04030201);
     });
 });

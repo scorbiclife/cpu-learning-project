@@ -228,7 +228,6 @@ export class CpuArithmeticLogicUnit {
             }
             case Opcode.STORE_INDIRECT: {
                 this.cpu.cu.loadWord(this.inputData);
-                this.cpu.cu.loadWord(this.cpu.memoryBufferRegister);
                 this.cpu.cu.storeWord(this.cpu.memoryBufferRegister, this.targetRegister);
                 return;
             }
