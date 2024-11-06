@@ -63,6 +63,48 @@ function defaultFlagsRegister(): FlagsRegister {
     };
 }
 
+export class Cpu {
+    cu: CpuControlUnit;
+
+    get programCounter(): Word {
+        return this.cu.programCounter;
+    }
+
+    get memoryAddressRegister(): Word {
+        return this.cu.memoryAddressRegister;
+    }
+
+    get memoryBufferRegister(): Word {
+        return this.cu.memoryBufferRegister;
+    }
+
+    get instructionRegister(): Word {
+        return this.cu.instructionRegister;
+    }
+
+    alu: CpuArithmeticLogicUnit;
+
+    generalRegisters: Record<Register, Word>;
+
+    stackPointer: Word;
+    baseRegister: Word;
+
+    constructor(public memory: Byte[]) {
+        this.cu = new CpuControlUnit(this, 0x0000);
+        this.alu = new CpuArithmeticLogicUnit(this);
+        this.generalRegisters = defaultRegisters();
+        this.stackPointer = memory.length - 1;
+        this.baseRegister = 0;
+    }
+
+
+    handleInstruction() {
+        this.cu.fetchAndDecode();
+        this.alu.execute();
+    }
+}
+
+
 const OPCODE_OFFSET = 0;
 const REGISTER_OPERAND_OFFSET = 1;
 const DATA_OPERAND_OFFSET = 2;
@@ -77,8 +119,8 @@ export class CpuControlUnit {
     memoryBufferRegister: Word;
     instructionRegister: Word;
 
-    registerOperand: Byte;
-    dataOperand: Word;
+    registerOperandSignal: Byte;
+    dataOperandSignal: Word;
 
     constructor(private cpu: Cpu, programCounter: Word) {
         this.programCounter = programCounter;
@@ -111,94 +153,60 @@ export class CpuControlUnit {
         this.cpu.memory[this.memoryAddressRegister + 1] = byte1;
     }
 
-    fetch() {
-        // 실제 CPU에서는 fetch 과정이 한 번에 일어나는 것으로 보입니다.
+    fetchAndDecode() {
         this.loadByte(this.programCounter + OPCODE_OFFSET);
         this.instructionRegister = this.memoryBufferRegister;
         this.loadByte(this.programCounter + REGISTER_OPERAND_OFFSET);
-        this.registerOperand = this.memoryBufferRegister;
+        const registerOperandSignal = this.memoryBufferRegister;
         this.loadWord(this.programCounter + DATA_OPERAND_OFFSET);
-        this.dataOperand = this.memoryBufferRegister;
+        const dataOperandSignal = this.memoryBufferRegister;
+
+        this.cpu.alu.inputOpcode = this.instructionRegister;
+        this.cpu.alu.inputRegisterName = registerOperandSignal;
+        this.cpu.alu.inputData= dataOperandSignal;
         this.programCounter += INSTRUCTION_LENGTH;
-    }
-}
-
-export class Cpu {
-    controlUnit: CpuControlUnit;
-
-    get programCounter(): Word {
-        return this.controlUnit.programCounter;
-    }
-
-    get memoryAddressRegister(): Word {
-        return this.controlUnit.memoryAddressRegister;
-    }
-
-    get memoryBufferRegister(): Word {
-        return this.controlUnit.memoryBufferRegister;
-    }
-
-    get instructionRegister(): Word {
-        return this.controlUnit.instructionRegister;
-    }
-
-    alu: CpuArithmeticLogicUnit;
-
-    generalRegisters: Record<Register, Word>;
-
-    stackPointer: Word;
-    baseRegister: Word;
-
-    constructor(public memory: Byte[]) {
-        this.controlUnit = new CpuControlUnit(this, 0x0000);
-        this.alu = new CpuArithmeticLogicUnit(this);
-        this.generalRegisters = defaultRegisters();
-        this.stackPointer = memory.length - 1;
-        this.baseRegister = 0;
-    }
-
-    handleInstruction() {
-        this.controlUnit.fetch();
-        this.alu.decodeExecuteWriteback();
     }
 }
 
 export class CpuArithmeticLogicUnit {
     private cpu: Cpu;
 
+    inputOpcode: Byte;
+    inputRegisterName: Byte;
+    inputData: Word;
+
     constructor(cpu: Cpu) {
         this.cpu = cpu;
     }
 
-    decodeExecuteWriteback() {
-        switch (this.cpu.controlUnit.instructionRegister) {
+    get targetRegister() {
+        return this.cpu.generalRegisters[this.inputRegisterName];
+    }
+
+    set targetRegister(value: Word) {
+        this.cpu.generalRegisters[this.inputRegisterName] = value;
+    }
+
+    execute() {
+        switch (this.inputOpcode) {
             case Opcode.NOP: {
                 return;
             }
             case Opcode.LOAD_IMMEDIATE: {
                 // write-back
-                this.cpu.generalRegisters[
-                    this.cpu.controlUnit.registerOperand
-                ] = this.cpu.controlUnit.dataOperand;
+                this.targetRegister = this.inputData;
                 return;
             }
             case Opcode.LOAD_DIRECT: {
                 // memory
-                this.cpu.controlUnit.loadWord(this.cpu.controlUnit.dataOperand);
+                this.cpu.cu.loadWord(this.inputData);
                 // write-back
-                this.cpu.generalRegisters[
-                    this.cpu.controlUnit.registerOperand
-                ] = this.cpu.controlUnit.memoryBufferRegister;
+                this.targetRegister = this.cpu.cu.memoryBufferRegister;
                 return;
             }
             case Opcode.STORE_DIRECT: {
                 // memory
-                this.cpu.controlUnit.storeWord(
-                    this.cpu.controlUnit.dataOperand,
-                    this.cpu.generalRegisters[
-                        this.cpu.controlUnit.registerOperand
-                    ]
-                );
+                this.cpu.cu.storeWord(this.inputData, this.targetRegister);
                 return;
             }
             case Opcode.MOV: {
