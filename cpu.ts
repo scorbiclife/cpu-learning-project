@@ -13,6 +13,20 @@ export enum Register {
     END,
 }
 
+function defaultRegisters(): Record<Register, Word> {
+    return {
+        [Register.R0]: 0x0000,
+        [Register.R1]: 0x0000,
+        [Register.R2]: 0x0000,
+        [Register.R3]: 0x0000,
+        [Register.R4]: 0x0000,
+        [Register.R5]: 0x0000,
+        [Register.R6]: 0x0000,
+        [Register.R7]: 0x0000,
+        [Register.END]: 0x0000,
+    };
+}
+
 export enum Opcode {
     START,
     NOP = START,
@@ -37,6 +51,17 @@ type FlagsRegister = {
     interrupt: boolean;
     supervisor: boolean;
 };
+
+function defaultFlagsRegister(): FlagsRegister {
+    return {
+        sign: false,
+        zero: false,
+        carry: false,
+        overflow: false,
+        interrupt: false,
+        supervisor: false,
+    };
+}
 
 const OPCODE_OFFSET = 0;
 const REGISTER_OPERAND_OFFSET = 1;
@@ -96,7 +121,6 @@ export class CpuControlUnit {
         this.dataOperand = this.memoryBufferRegister;
         this.programCounter += INSTRUCTION_LENGTH;
     }
-
 }
 
 export class Cpu {
@@ -118,65 +142,62 @@ export class Cpu {
         return this.controlUnit.instructionRegister;
     }
 
-    flagsRegister: FlagsRegister;
+    alu: CpuArithmeticLogicUnit;
+
     generalRegisters: Record<Register, Word>;
+
     stackPointer: Word;
     baseRegister: Word;
 
     constructor(public memory: Byte[]) {
         this.controlUnit = new CpuControlUnit(this, 0x0000);
-        this.flagsRegister = {
-            sign: false,
-            zero: false,
-            carry: false,
-            overflow: false,
-            interrupt: false,
-            supervisor: false,
-        };
-        this.generalRegisters = {
-            [Register.R0]: 0x0000,
-            [Register.R1]: 0x0000,
-            [Register.R2]: 0x0000,
-            [Register.R3]: 0x0000,
-            [Register.R4]: 0x0000,
-            [Register.R5]: 0x0000,
-            [Register.R6]: 0x0000,
-            [Register.R7]: 0x0000,
-            [Register.END]: 0x0000, // unused
-        };
+        this.alu = new CpuArithmeticLogicUnit(this);
+        this.generalRegisters = defaultRegisters();
         this.stackPointer = memory.length - 1;
         this.baseRegister = 0;
     }
 
     handleInstruction() {
         this.controlUnit.fetch();
-        this.decodeExecuteWriteback();
+        this.alu.decodeExecuteWriteback();
+    }
+}
+
+export class CpuArithmeticLogicUnit {
+    private cpu: Cpu;
+
+    constructor(cpu: Cpu) {
+        this.cpu = cpu;
     }
 
     decodeExecuteWriteback() {
-        switch (this.controlUnit.instructionRegister) {
+        switch (this.cpu.controlUnit.instructionRegister) {
             case Opcode.NOP: {
                 return;
             }
             case Opcode.LOAD_IMMEDIATE: {
                 // write-back
-                this.generalRegisters[this.controlUnit.registerOperand] =
-                    this.controlUnit.dataOperand;
+                this.cpu.generalRegisters[
+                    this.cpu.controlUnit.registerOperand
+                ] = this.cpu.controlUnit.dataOperand;
                 return;
             }
             case Opcode.LOAD_DIRECT: {
                 // memory
-                this.controlUnit.loadWord(this.controlUnit.dataOperand);
+                this.cpu.controlUnit.loadWord(this.cpu.controlUnit.dataOperand);
                 // write-back
-                this.generalRegisters[this.controlUnit.registerOperand] =
-                    this.controlUnit.memoryBufferRegister;
+                this.cpu.generalRegisters[
+                    this.cpu.controlUnit.registerOperand
+                ] = this.cpu.controlUnit.memoryBufferRegister;
                 return;
             }
             case Opcode.STORE_DIRECT: {
                 // memory
-                this.controlUnit.storeWord(
-                    this.controlUnit.dataOperand,
-                    this.generalRegisters[this.controlUnit.registerOperand]
+                this.cpu.controlUnit.storeWord(
+                    this.cpu.controlUnit.dataOperand,
+                    this.cpu.generalRegisters[
+                        this.cpu.controlUnit.registerOperand
+                    ]
                 );
                 return;
             }
