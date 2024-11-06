@@ -1,4 +1,9 @@
-import { Word, Byte, getWordFromBytes, getBytesFromWord } from "./lib";
+import {
+    Word,
+    Byte,
+    loadWordAtAddress,
+    storeWordAtAddress,
+} from "./lib";
 
 export enum Register {
     START,
@@ -34,6 +39,8 @@ export enum Opcode {
     LOAD_IMMEDIATE_2,
     LOAD_DIRECT,
     STORE_DIRECT,
+    LOAD_INDIRECT,
+    STORE_INDIRECT,
     MOV,
     ADD,
     SUB,
@@ -139,24 +146,20 @@ export class CpuControlUnit {
 
     loadWord(address: Word) {
         this.memoryAddressRegister = address;
-        this.memoryBufferRegister = getWordFromBytes(
-            this.cpu.memory[this.memoryAddressRegister],
-            this.cpu.memory[this.memoryAddressRegister + 1],
-            this.cpu.memory[this.memoryAddressRegister + 2],
-            this.cpu.memory[this.memoryAddressRegister + 3]
+        this.memoryBufferRegister = loadWordAtAddress(
+            this.cpu.memory,
+            this.memoryAddressRegister
         );
     }
 
     storeWord(address: Word, value: Word) {
         this.memoryAddressRegister = address;
         this.memoryBufferRegister = value;
-        const [byte0, byte1, byte2, byte3] = getBytesFromWord(
+        storeWordAtAddress(
+            this.cpu.memory,
+            this.memoryAddressRegister,
             this.memoryBufferRegister
         );
-        this.cpu.memory[this.memoryAddressRegister] = byte0;
-        this.cpu.memory[this.memoryAddressRegister + 1] = byte1;
-        this.cpu.memory[this.memoryAddressRegister + 2] = byte2;
-        this.cpu.memory[this.memoryAddressRegister + 3] = byte3;
     }
 
     fetch() {
@@ -175,7 +178,7 @@ export class CpuControlUnit {
 export class CpuArithmeticLogicUnit {
     private cpu: Cpu;
 
-    inputOpcode: Byte;
+    inputOpcode: Opcode;
     inputRegisterName: Byte;
     inputData: Word;
 
@@ -198,24 +201,40 @@ export class CpuArithmeticLogicUnit {
             }
             case Opcode.LOAD_IMMEDIATE_1: {
                 // write-back
-                this.targetRegister = (this.targetRegister & 0xffff0000) | this.inputData;
+                this.targetRegister =
+                    (this.targetRegister & 0xffff0000) | this.inputData;
                 return;
             }
             case Opcode.LOAD_IMMEDIATE_2: {
                 // write-back
-                this.targetRegister = (this.targetRegister & 0x0000ffff) | (this.inputData << 16);
+                this.targetRegister =
+                    (this.targetRegister & 0x0000ffff) | (this.inputData << 16);
                 return;
             }
             case Opcode.LOAD_DIRECT: {
                 // memory
                 this.cpu.cu.loadWord(this.inputData);
                 // write-back
-                this.targetRegister = this.cpu.cu.memoryBufferRegister;
+                this.targetRegister = this.cpu.memoryBufferRegister;
                 return;
             }
             case Opcode.STORE_DIRECT: {
                 // memory
                 this.cpu.cu.storeWord(this.inputData, this.targetRegister);
+                return;
+            }
+            case Opcode.LOAD_INDIRECT: {
+                this.cpu.cu.loadWord(this.inputData);
+                this.cpu.cu.loadWord(this.cpu.memoryBufferRegister);
+                this.targetRegister = this.cpu.memoryBufferRegister;
+                return;
+            }
+            case Opcode.STORE_INDIRECT: {
+                this.cpu.cu.loadWord(this.inputData);
+                this.cpu.cu.storeWord(
+                    this.cpu.memoryBufferRegister,
+                    this.targetRegister
+                );
                 return;
             }
             case Opcode.MOV: {
