@@ -99,7 +99,8 @@ export class Cpu {
     }
 
     handleInstruction() {
-        this.cu.fetchAndDecode();
+        this.cu.fetch();
+        this.cu.decode();
         this.alu.execute();
     }
 }
@@ -158,14 +159,16 @@ export class CpuControlUnit {
         this.cpu.memory[this.memoryAddressRegister + 3] = byte3;
     }
 
-    fetchAndDecode() {
+    fetch() {
         this.loadWord(this.programCounter + OPCODE_OFFSET);
         this.instructionRegister = this.memoryBufferRegister;
+        this.programCounter += INSTRUCTION_LENGTH;
+    }
 
+    decode() {
         this.cpu.alu.inputOpcode = this.instructionRegister & 0xff;
         this.cpu.alu.inputRegisterName = (this.instructionRegister >> 8) & 0xff;
         this.cpu.alu.inputData = this.instructionRegister >> 16;
-        this.programCounter += INSTRUCTION_LENGTH;
     }
 }
 

@@ -19,3 +19,4 @@
           한정되어 있다는 것이 새로운 고려 대상입니다.
           그래서 기존의 LOAD_IMMEDIATE 명령어를 LOAD_IMMEDIATE_1, LOAD_IMMEDIATE_2로 바꾸어 각각
           {least, most} significant 16비트를 세팅할 수 있도록 하였습니다.
+        - fetch, decode, execute을 분리하여 구현하기 더 편해졌습니다.
