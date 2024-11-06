@@ -1,6 +1,6 @@
 import { test, expect, describe } from "@jest/globals";
 import { Cpu, Opcode, Register } from "./cpu";
-import { Byte, getWordFromBytes, Word } from "./lib";
+import { Byte, loadWordAtAddress, Word, storeWordAtAddress } from "./lib";
 
 const { R0, R1, R2 } = Register;
 const {
@@ -65,15 +65,9 @@ test("direct memory addressing", () => {
 describe("indirect memory addressing", () => {
     test("load indirect", () => {
         const memory = createLargeZeroMemory();
-        [memory[0x100], memory[0x101], memory[0x102], memory[0x103]] = [
-            0x00, 0x23, 0x45, 0x67,
-        ];
-        [
-            memory[0x67452300],
-            memory[0x67452301],
-            memory[0x67452302],
-            memory[0x67452303],
-        ] = [0x01, 0x02, 0x03, 0x04];
+        storeWordAtAddress(memory, 0x100, 0x76543210);
+        storeWordAtAddress(memory, 0x76543210, 0x04030201);
+
         // prettier-ignore
         const program = [
             LOAD_INDIRECT, R0, 0x00, 0x01,
@@ -84,26 +78,14 @@ describe("indirect memory addressing", () => {
         const cpu = new Cpu(memory);
         runProgram(cpu, program);
 
-        const result = getWordFromBytes(
-            memory[0x200],
-            memory[0x201],
-            memory[0x202],
-            memory[0x203]
-        );
+        const result = loadWordAtAddress(memory, 0x0200);
         expect(result).toEqual(0x04030201);
     });
 
     test("store indirect", () => {
         const memory = createLargeZeroMemory();
-        memory[0x0100] = 0x10;
-        memory[0x0101] = 0x32;
-        memory[0x0102] = 0x54;
-        memory[0x0103] = 0x76;
-
-        memory[0x0200] = 0x01;
-        memory[0x0201] = 0x02;
-        memory[0x0202] = 0x03;
-        memory[0x0203] = 0x04;
+        storeWordAtAddress(memory, 0x0100, 0x76543210);
+        storeWordAtAddress(memory, 0x0200, 0x04030201);
 
         // prettier-ignore
         const program = [
@@ -115,12 +97,7 @@ describe("indirect memory addressing", () => {
         const cpu = new Cpu(memory);
         runProgram(cpu, program);
 
-        const result = getWordFromBytes(
-            memory[0x76543210],
-            memory[0x76543211],
-            memory[0x76543212],
-            memory[0x76543213]
-        );
+        const result = loadWordAtAddress(memory, 0x76543210);
         expect(result).toEqual(0x04030201);
     });
 });
