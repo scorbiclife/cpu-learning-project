@@ -38,6 +38,11 @@ type FlagsRegister = {
     supervisor: boolean;
 };
 
+const OPCODE_OFFSET = 0;
+const REGISTER_OPERAND_OFFSET = 1;
+const DATA_OPERAND_OFFSET = 2;
+const INSTRUCTION_LENGTH = 4;
+
 /**
  * 참고 자료: https://esyeonge.tistory.com/28
  */
@@ -82,13 +87,14 @@ export class CpuControlUnit {
     }
 
     fetch() {
-        this.loadByte(this.programCounter);
+        // 실제 CPU에서는 fetch 과정이 한 번에 일어나는 것으로 보입니다.
+        this.loadByte(this.programCounter + OPCODE_OFFSET);
         this.instructionRegister = this.memoryBufferRegister;
-        this.loadByte(this.programCounter + 1);
+        this.loadByte(this.programCounter + REGISTER_OPERAND_OFFSET);
         this.registerOperand = this.memoryBufferRegister;
-        this.loadWord(this.programCounter + 2);
+        this.loadWord(this.programCounter + DATA_OPERAND_OFFSET);
         this.dataOperand = this.memoryBufferRegister;
-        this.programCounter += 4;
+        this.programCounter += INSTRUCTION_LENGTH;
     }
 
 }
