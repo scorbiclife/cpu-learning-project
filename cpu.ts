@@ -113,8 +113,6 @@ export class Cpu {
 }
 
 const OPCODE_OFFSET = 0;
-const REGISTER_OPERAND_OFFSET = 1;
-const DATA_OPERAND_OFFSET = 2;
 const INSTRUCTION_LENGTH = 4;
 
 /**
