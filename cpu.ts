@@ -73,22 +73,10 @@ function defaultFlagsRegister(): FlagsRegister {
 
 export class Cpu {
     cu: CpuControlUnit;
-
-    get programCounter(): Word {
-        return this.cu.programCounter;
-    }
-
-    get memoryAddressRegister(): Word {
-        return this.cu.memoryAddressRegister;
-    }
-
-    get memoryBufferRegister(): Word {
-        return this.cu.memoryBufferRegister;
-    }
-
-    get instructionRegister(): Word {
-        return this.cu.instructionRegister;
-    }
+    programCounter: Word;
+    memoryAddressRegister: Word;
+    memoryBufferRegister: Word;
+    instructionRegister: Word;
 
     alu: CpuArithmeticLogicUnit;
 
@@ -119,57 +107,53 @@ const INSTRUCTION_LENGTH = 4;
  * 참고 자료: https://esyeonge.tistory.com/28
  */
 export class CpuControlUnit {
-    programCounter: Word;
-    memoryAddressRegister: Word;
-    memoryBufferRegister: Word;
-    instructionRegister: Word;
 
     registerOperandSignal: Byte;
     dataOperandSignal: Word;
 
     constructor(private cpu: Cpu, programCounter: Word) {
-        this.programCounter = programCounter;
+        this.cpu.programCounter = programCounter;
     }
 
     loadByte(address: Word) {
-        this.memoryAddressRegister = address;
-        this.memoryBufferRegister = this.cpu.memory[this.memoryAddressRegister];
+        this.cpu.memoryAddressRegister = address;
+        this.cpu.memoryBufferRegister = this.cpu.memory[this.cpu.memoryAddressRegister];
     }
 
     storeByte(address: Word, value: Byte) {
-        this.memoryAddressRegister = address;
-        this.memoryBufferRegister = value;
-        this.cpu.memory[this.memoryAddressRegister] = this.memoryBufferRegister;
+        this.cpu.memoryAddressRegister = address;
+        this.cpu.memoryBufferRegister = value;
+        this.cpu.memory[this.cpu.memoryAddressRegister] = this.cpu.memoryBufferRegister;
     }
 
     loadWord(address: Word) {
-        this.memoryAddressRegister = address;
-        this.memoryBufferRegister = loadWordAtAddress(
+        this.cpu.memoryAddressRegister = address;
+        this.cpu.memoryBufferRegister = loadWordAtAddress(
             this.cpu.memory,
-            this.memoryAddressRegister
+            this.cpu.memoryAddressRegister
         );
     }
 
     storeWord(address: Word, value: Word) {
-        this.memoryAddressRegister = address;
-        this.memoryBufferRegister = value;
+        this.cpu.memoryAddressRegister = address;
+        this.cpu.memoryBufferRegister = value;
         storeWordAtAddress(
             this.cpu.memory,
-            this.memoryAddressRegister,
-            this.memoryBufferRegister
+            this.cpu.memoryAddressRegister,
+            this.cpu.memoryBufferRegister
         );
     }
 
     fetch() {
-        this.loadWord(this.programCounter + OPCODE_OFFSET);
-        this.instructionRegister = this.memoryBufferRegister;
-        this.programCounter += INSTRUCTION_LENGTH;
+        this.loadWord(this.cpu.programCounter + OPCODE_OFFSET);
+        this.cpu.instructionRegister = this.cpu.memoryBufferRegister;
+        this.cpu.programCounter += INSTRUCTION_LENGTH;
     }
 
     decode() {
-        this.cpu.alu.inputOpcode = this.instructionRegister & 0xff;
-        this.cpu.alu.inputRegisterName = (this.instructionRegister >> 8) & 0xff;
-        this.cpu.alu.inputData = this.instructionRegister >> 16;
+        this.cpu.alu.inputOpcode = this.cpu.instructionRegister & 0xff;
+        this.cpu.alu.inputRegisterName = (this.cpu.instructionRegister >> 8) & 0xff;
+        this.cpu.alu.inputData = this.cpu.instructionRegister >> 16;
     }
 }
 
