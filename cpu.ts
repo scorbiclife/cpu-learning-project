@@ -6,8 +6,7 @@ import {
 } from "./lib";
 
 export enum Register {
-    START,
-    R0 = START,
+    R0,
     R1,
     R2,
     R3,
@@ -15,7 +14,6 @@ export enum Register {
     R5,
     R6,
     R7,
-    END,
 }
 
 function defaultRegisters(): Record<Register, Word> {
@@ -28,7 +26,6 @@ function defaultRegisters(): Record<Register, Word> {
         [Register.R5]: 0x0000,
         [Register.R6]: 0x0000,
         [Register.R7]: 0x0000,
-        [Register.END]: 0x0000,
     };
 }
 
