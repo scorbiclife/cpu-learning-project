@@ -33,8 +33,7 @@ function defaultRegisters(): Record<Register, Word> {
 }
 
 export enum Opcode {
-    START,
-    NOP = START,
+    NOP,
     LOAD_IMMEDIATE_1,
     LOAD_IMMEDIATE_2,
     LOAD_DIRECT,
