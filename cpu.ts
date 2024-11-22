@@ -27,34 +27,10 @@ function defaultRegisters(): Record<Register, Word> {
         [Register.R6]: 0x0000,
         [Register.R7]: 0x0000,
     };
-/*************  ✨ Codeium Command 🌟  *************/
+}
+
 export enum Opcode {
     NOP,
-    LOAD_IMMEDIATE_1,
-    LOAD_IMMEDIATE_2,
-    LOAD_DIRECT,
-    STORE_DIRECT,
-    LOAD_INDIRECT,
-    STORE_INDIRECT,
-}
-
-function defaultRegisters(): Record<Register, Word> {
-    return {
-        [Register.R0]: 0x0000,
-        [Register.R1]: 0x0000,
-        [Register.R2]: 0x0000,
-        [Register.R3]: 0x0000,
-        [Register.R4]: 0x0000,
-        [Register.R5]: 0x0000,
-        [Register.R6]: 0x0000,
-        [Register.R7]: 0x0000,
-    };
-}
-/******  07c5d2c7-ba19-4c3e-aa79-28272a162ea8  *******/
-
-export enum Opcode2 {
-    START,
-    NOP = START,
     LOAD_IMMEDIATE_1,
     LOAD_IMMEDIATE_2,
     LOAD_DIRECT,
