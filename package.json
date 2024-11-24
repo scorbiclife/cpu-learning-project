@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "main": "index.ts",
   "scripts": {
-    "start": "npx ts-node index.ts",
+    "start": "npx ts-node src/index.ts",
     "test": "jest"
   },
   "keywords": [],
