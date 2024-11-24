@@ -10,6 +10,7 @@ const {
     STORE_DIRECT,
     LOAD_INDIRECT,
     STORE_INDIRECT,
+    MOV,
     NOP,
     ADD,
 } = Opcode;
@@ -104,3 +105,22 @@ describe("indirect memory addressing", () => {
         expect(result).toEqual(0x04030201);
     });
 });
+
+describe("mov instruction", () => {
+    test("mov from one register to another", () => {
+        const memory = createLargeZeroMemory();
+        const program = [
+            LOAD_IMMEDIATE_1, R0, 0x01, 0x02,
+            LOAD_IMMEDIATE_2, R0, 0x03, 0x04,
+            MOV, R1, R0, 0x00,
+            STORE_DIRECT, R1, 0x00, 0x01,
+        ];
+        storeBytes(memory, program);
+
+        const cpu = new Cpu(memory);
+        runProgram(cpu, program);
+
+        const result = loadWordAtAddress(memory, 0x0100);
+        expect(result).toEqual(0x04030201);
+    })
+})

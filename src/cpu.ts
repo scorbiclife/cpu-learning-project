@@ -216,6 +216,7 @@ export class CpuArithmeticLogicUnit {
                 return;
             }
             case Opcode.MOV: {
+                this.targetRegister = this.cpu.generalRegisters[this.inputData];
                 return;
             }
             case Opcode.ADD: {
