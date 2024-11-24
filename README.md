@@ -4,6 +4,11 @@
 
 - [개발 일지](https://www.inflearn.com/blogs/9185)
 
+- 구조
+    - `src` 폴더에서 확인할 수 있습니다.
+        - 테스트 파일은 소스 파일과 같은 디렉터리 내에 두었으며,
+          빠른 파악을 위해서라면 테스트 코드에서 가상 cpu의 명령어 코드의 예시들을 확인하는 것을 권장드립니다.
+
 - 디자인 결정들
 
     - 32비트의 고정된 길이의 명령어, 1비트 opcode, 1bit register operand, 2bit data operand
