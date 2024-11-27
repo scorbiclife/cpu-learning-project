@@ -31,6 +31,7 @@ function defaultRegisters(): Record<Register, Word> {
 
 export enum Opcode {
     NOP,
+    HALT,
     LOAD_IMMEDIATE_1,
     LOAD_IMMEDIATE_2,
     LOAD_DIRECT,
@@ -175,6 +176,9 @@ export class CpuArithmeticLogicUnit {
     execute() {
         switch (this.inputOpcode) {
             case Opcode.NOP: {
+                return;
+            }
+            case Opcode.HALT: {
                 return;
             }
             case Opcode.LOAD_IMMEDIATE_1: {

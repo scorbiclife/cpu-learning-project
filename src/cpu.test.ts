@@ -1,9 +1,10 @@
 import { test, expect, describe } from "@jest/globals";
 import { Cpu, Opcode, Register } from "./cpu";
-import { Byte, loadWordAtAddress, storeBytes, storeWordAtAddress } from "./lib";
+import { Byte, loadWordAtAddress, storeBytes, storeWordAtAddress, Word } from "./lib";
 
 const { R0, R1, R2 } = Register;
 const {
+    HALT,
     LOAD_IMMEDIATE_1,
     LOAD_IMMEDIATE_2,
     LOAD_DIRECT,
@@ -23,8 +24,10 @@ function createLargeZeroMemory(): Byte[] {
     });
 }
 
-function runProgram(cpu: Cpu, program: Byte[]) {
-    while (cpu.programCounter < program.length) {
+function runProgram(memory: Byte[], programStart: Word = 0) {
+    const cpu = new Cpu(memory);
+    cpu.programCounter = programStart;
+    while (memory[cpu.programCounter] !== HALT) {
         cpu.handleInstruction();
     }
 }
@@ -38,11 +41,10 @@ describe("direct memory addressing", () => {
         LOAD_IMMEDIATE_1, R1, 0x02, 0x03, // sets the lower two bytes
         LOAD_IMMEDIATE_2, R1, 0x04, 0x05, // sets the higher two bytes
         STORE_DIRECT, R1, 0x00, 0x01, // Address 256
+        HALT, 0x00, 0x00, 0x00
     ];
         storeBytes(memory, program);
-
-        const cpu = new Cpu(memory);
-        runProgram(cpu, program);
+        runProgram(memory);
 
         // system is little-endian
         expect(loadWordAtAddress(memory, 256)).toBe(0x05040302);
@@ -57,9 +59,7 @@ describe("direct memory addressing", () => {
         STORE_DIRECT, R1, 0x04, 0x01, // Address 260
     ];
         storeBytes(memory, program);
-
-        const cpu = new Cpu(memory);
-        runProgram(cpu, program);
+        runProgram(memory);
 
         expect(loadWordAtAddress(memory, 256)).toBe(0x67452301);
         expect(loadWordAtAddress(memory, 260)).toBe(0x67452301);
@@ -78,9 +78,7 @@ describe("indirect memory addressing", () => {
             STORE_DIRECT, R0, 0x00, 0x02, // address 0x200
         ];
         storeBytes(memory, program);
-
-        const cpu = new Cpu(memory);
-        runProgram(cpu, program);
+        runProgram(memory);
 
         const result = loadWordAtAddress(memory, 0x0200);
         expect(result).toEqual(0x04030201);
@@ -97,9 +95,7 @@ describe("indirect memory addressing", () => {
             STORE_INDIRECT, R0, 0x00, 0x01, // 0x0100
         ];
         storeBytes(memory, program);
-
-        const cpu = new Cpu(memory);
-        runProgram(cpu, program);
+        runProgram(memory);
 
         const result = loadWordAtAddress(memory, 0x76543210);
         expect(result).toEqual(0x04030201);
@@ -116,9 +112,7 @@ describe("mov instruction", () => {
             STORE_DIRECT, R1, 0x00, 0x01,
         ];
         storeBytes(memory, program);
-
-        const cpu = new Cpu(memory);
-        runProgram(cpu, program);
+        runProgram(memory);
 
         const result = loadWordAtAddress(memory, 0x0100);
         expect(result).toEqual(0x04030201);
