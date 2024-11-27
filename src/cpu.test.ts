@@ -121,3 +121,21 @@ describe("mov instruction", () => {
         expect(loadWordAtAddress(memory, 0x0100)).toEqual(0x04030201);
     });
 });
+
+describe("add instruction", () => {
+    test("add should add the contents from one register to another", () => {
+        const program = [
+            LOAD_IMMEDIATE_1, R0, 0x01, 0x02,
+            LOAD_IMMEDIATE_2, R0, 0x03, 0x04,
+            LOAD_IMMEDIATE_1, R1, 0x01, 0x01,
+            LOAD_IMMEDIATE_2, R1, 0x01, 0x01,
+            ADD, R1, R0, 0x00,
+            STORE_DIRECT, R1, 0x00, 0x01,
+            HALT, 0x00, 0x00, 0x00,
+        ];
+        const memory = createLargeZeroMemory();
+        loadProgram(memory, program);
+        runProgram(memory);
+        expect(loadWordAtAddress(memory, 0x0100)).toEqual(0x05040302);
+    });
+});

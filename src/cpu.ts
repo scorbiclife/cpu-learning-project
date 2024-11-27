@@ -224,6 +224,7 @@ export class CpuArithmeticLogicUnit {
                 return;
             }
             case Opcode.ADD: {
+                this.targetRegister += this.cpu.generalRegisters[this.inputData];
                 return;
             }
             case Opcode.SUB: {
