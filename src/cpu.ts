@@ -228,6 +228,8 @@ export class CpuArithmeticLogicUnit {
                 return;
             }
             case Opcode.SUB: {
+                this.targetRegister -= this.cpu.generalRegisters[this.inputData];
+                this.targetRegister = this.targetRegister & 0xffffffff;
                 return;
             }
             case Opcode.MUL: {
