@@ -18,7 +18,6 @@ const {
     LOAD_INDIRECT,
     STORE_INDIRECT,
     MOV,
-    NOP,
     ADD,
 } = Opcode;
 
@@ -124,6 +123,7 @@ describe("mov instruction", () => {
 
 describe("add instruction", () => {
     test("add should add the contents from one register to another", () => {
+        // prettier-ignore
         const program = [
             LOAD_IMMEDIATE_1, R0, 0x01, 0x02,
             LOAD_IMMEDIATE_2, R0, 0x03, 0x04,
@@ -131,7 +131,6 @@ describe("add instruction", () => {
             LOAD_IMMEDIATE_2, R1, 0x01, 0x01,
             ADD, R1, R0, 0x00,
             STORE_DIRECT, R1, 0x00, 0x01,
-            HALT, 0x00, 0x00, 0x00,
         ];
         const memory = createLargeZeroMemory();
         loadProgram(memory, program);
