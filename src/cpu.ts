@@ -30,8 +30,8 @@ function defaultRegisters(): Record<Register, Word> {
 }
 
 export enum Opcode {
+    HALT = 0,
     NOP,
-    HALT,
     LOAD_IMMEDIATE_1,
     LOAD_IMMEDIATE_2,
     LOAD_DIRECT,
@@ -44,7 +44,6 @@ export enum Opcode {
     MUL,
     JMP,
     JNZ,
-    END,
 }
 
 type FlagsRegister = {
@@ -175,10 +174,10 @@ export class CpuArithmeticLogicUnit {
 
     execute() {
         switch (this.inputOpcode) {
-            case Opcode.NOP: {
+            case Opcode.HALT: {
                 return;
             }
-            case Opcode.HALT: {
+            case Opcode.NOP: {
                 return;
             }
             case Opcode.LOAD_IMMEDIATE_1: {
